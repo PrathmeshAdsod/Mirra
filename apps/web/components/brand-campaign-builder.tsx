@@ -39,6 +39,7 @@ type LookEdit = {
 type CampaignPayload = {
   name: string;
   status: string;
+  published_manifest_id?: string | null;
   duration_seconds?: number;
   source_url?: string;
   processing_error?: string | null;
@@ -120,6 +121,7 @@ export function BrandCampaignBuilder({ initialStep = 0, initialCampaignId = null
   const [videoTime, setVideoTime] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
   const [publishedManifestId, setPublishedManifestId] = useState<string | null>(null);
+  const [campaignPublished, setCampaignPublished] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const title = useMemo(() => ["Name the campaign", "Add the campaign film", "Add products and references", "Set the creative direction", "Review detected looks", "Ready to publish"][step], [step]);
   const reviewLooks = detectedLooks;
@@ -138,6 +140,8 @@ export function BrandCampaignBuilder({ initialStep = 0, initialCampaignId = null
         const payload = await apiFetch<CampaignPayload>(`/v1/campaigns/${campaignId}`, { headers: { Authorization: `Bearer ${token}` } });
         if (stopped) return;
         setCampaignName(payload.name);
+        setCampaignPublished(payload.status === "published");
+        if (payload.published_manifest_id) setPublishedManifestId(payload.published_manifest_id);
         if (payload.duration_seconds) setVideoDuration(Number(payload.duration_seconds));
         if (payload.source_url) setSourceVideoUrl(payload.source_url);
         const products = payload.products.filter((item) => item.reference_asset_id).map((item) => ({
@@ -151,7 +155,7 @@ export function BrandCampaignBuilder({ initialStep = 0, initialCampaignId = null
           setMessage(payload.processing_error || "Campaign analysis failed.");
           return;
         }
-        if (payload.status === "review" && payload.looks.length) {
+        if (["review", "published"].includes(payload.status) && payload.looks.length) {
           setDetectedLooks(payload.looks);
           setSelected((current) => Math.min(current, payload.looks.length - 1));
           setLookEdits((current) => {
@@ -159,7 +163,7 @@ export function BrandCampaignBuilder({ initialStep = 0, initialCampaignId = null
             for (const look of payload.looks) next[look.id] ||= defaultEdit(look, products);
             return next;
           });
-          setMessage(`${payload.looks.length} detected looks are ready for confirmation.`);
+          setMessage(payload.status === "published" ? `${payload.looks.length} confirmed looks are published.` : `${payload.looks.length} detected looks are ready for confirmation.`);
           return;
         }
         setMessage(payload.status === "analyzing" ? "Gemini is analyzing the campaign once. You can leave this page open." : "Preparing campaign mechanics before the single Gemini analysis.");
@@ -395,7 +399,7 @@ export function BrandCampaignBuilder({ initialStep = 0, initialCampaignId = null
           <details className="advanced-controls"><summary>Advanced look controls</summary><label>Garment category<span className="select-wrap"><select value={activeEdit.category} onChange={(event) => updateLook({ category: event.target.value as GarmentCategory })}><option value="outerwear">Outerwear</option><option value="full_body">Full body</option><option value="upper_body">Upper body</option><option value="lower_body">Lower body</option><option value="shoes">Shoes</option><option value="auto">Auto fallback</option></select><CaretDown /></span></label>{activeEdit.remixAllowed && <AlternativePicker products={availableProducts} mappedReferenceId={activeEdit.referenceAssetId} options={activeEdit.remixOptions} onChange={(remixOptions) => updateLook({ remixOptions })} />}</details>
         </section>
         {message && <p className="form-message review-message" role="status">{message}</p>}
-        <footer className="review-footer"><button className="secondary-button" onClick={() => setStep(3)}>Back</button><button className="primary-button" disabled={busy || (Boolean(campaignId) && !detectedLooks.length)} onClick={saveReview}>{busy ? "Saving…" : <>Save &amp; Preview <Sparkle weight="fill" /></>}</button></footer>
+        <footer className="review-footer"><button className="secondary-button" onClick={() => setStep(3)}>Back</button><button className="primary-button" disabled={busy || campaignPublished || (Boolean(campaignId) && !detectedLooks.length)} onClick={saveReview}>{campaignPublished ? "Published" : busy ? "Saving…" : <>Save &amp; Preview <Sparkle weight="fill" /></>}</button></footer>
       </BrandShell>
     );
   }
