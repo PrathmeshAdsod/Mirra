@@ -1,0 +1,17 @@
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+**/node_modules
+**/.next
+**/.venv
+**/__pycache__
+**/.pytest_cache
+screenshots
+traces
+artifacts
+test-results
+apps/web/public/demo-media
+design-qa.md
+*.log

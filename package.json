@@ -1,0 +1,15 @@
+{
+  "name": "mirra",
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @mirra/web run dev",
+    "build": "npm --workspace @mirra/web run build",
+    "lint": "npm --workspace @mirra/web run lint",
+    "test": "npm --workspace @mirra/web run test",
+    "typecheck": "npm --workspace @mirra/web run typecheck"
+  }
+}
