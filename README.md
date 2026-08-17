@@ -56,3 +56,7 @@ See [SETUP.md](SETUP.md) for exact setup and verification commands.
 ## Repository policy
 
 Only this README and SETUP are maintained as committed Markdown documentation. Demo media, screenshots, traces, uploads, generated outputs, debug payloads, recordings, one-off scripts, and implementation artifacts are ignored and must not be committed.
+
+## License
+
+MIRRA is available under the [Apache License 2.0](LICENSE).
