@@ -42,7 +42,7 @@ export function CampaignPreview() {
     setPlaying((current) => !current);
   }
 
-  const allowDevelopmentMedia = process.env.NODE_ENV !== "production" || Boolean(process.env.NEXT_PUBLIC_DEMO_MEDIA_BASE_URL);
+  const allowDevelopmentMedia = process.env.NODE_ENV !== "production" && Boolean(process.env.NEXT_PUBLIC_DEMO_MEDIA_BASE_URL);
   const label = published ? `${published.brand.name} — ${published.campaign.name}` : "MIRRA EDITORIAL — STUDY 01";
 
   return (

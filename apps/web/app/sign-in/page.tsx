@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 
 export default function SignInPage() {
-  const router = useRouter();
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -24,21 +22,21 @@ export default function SignInPage() {
       email: String(form.get("email")),
       password: String(form.get("password")),
     });
-    setBusy(false);
     if (error) {
+      setBusy(false);
       setMessage(error.message);
       return;
     }
     const requested = new URLSearchParams(window.location.search).get("next");
     if (requested?.startsWith("/") && !requested.startsWith("//")) {
-      router.push(requested);
+      window.location.replace(requested);
       return;
     }
     try {
       const profile = await apiFetch<{ brand_id: string | null }>("/v1/me", { headers: { Authorization: `Bearer ${data.session?.access_token}` } });
-      router.push(profile.brand_id ? "/brand/campaigns/new" : "/mirrors");
+      window.location.replace(profile.brand_id ? "/brand/campaigns/new" : "/mirrors");
     } catch {
-      router.push("/mirrors");
+      window.location.replace("/mirrors");
     }
   }
 
